@@ -41,9 +41,10 @@ void main() {
       return Uint8List(0);
     }
 
-    final calculator = PersistedCache(MMTestStorage());
+    final persistedCache = PersistedCache();
+    persistedCache.setup(MMTestStorage(), _fileDownloader);
 
-    calculator.getFile("0000", "img", "url", "avartaImage", _fileDownloader, _fileProcessor);
+    persistedCache.getFile("0000", "img", "url", "avartaImage", _fileProcessor);
 //    expect(calculator.addOne(2), 3);
 //    expect(calculator.addOne(-7), -6);
 //    expect(calculator.addOne(0), 1);
