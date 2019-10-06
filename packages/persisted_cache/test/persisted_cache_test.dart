@@ -4,10 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:persisted_cache/persisted_cache.dart';
 
 class MMTestStorage extends MMPersistedStorage {
-  @override
-  Future<MMFileInfo> createRecord(String uuid, String originalURL, String fileType, String processType) {
-    return null;
-  }
 
   @override
   Future<MMFileInfo> queryRecord(String uuid) {
@@ -26,6 +22,11 @@ class MMTestStorage extends MMPersistedStorage {
 
   @override
   Future setProcessed(String uuid, String thumbnailURL) {
+    return null;
+  }
+
+  @override
+  Future<MMFileInfo> createRecord(MMFileInfo fileInfo) {
     return null;
   }
 

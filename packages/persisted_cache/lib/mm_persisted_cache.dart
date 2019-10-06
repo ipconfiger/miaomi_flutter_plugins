@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:persisted_cache/mm_file_info.dart';
+
 import 'mm_file_manager.dart';
 import 'mm_persisted_storage.dart';
 
@@ -29,7 +31,12 @@ class PersistedCache {
 
     var fileObject = await storage.queryRecord(uuid);
     if (fileObject == null) {
-      fileObject = await storage.createRecord(uuid, url, fileType, processType);
+      MMFileInfo fileInfo = MMFileInfo();
+      fileInfo.uuid = uuid;
+      fileInfo.localURL = url;
+      fileInfo.fileType = fileType;
+      fileInfo.processType = processType;
+      fileObject = await storage.createRecord(fileInfo);
     }
 
     if (!fileObject.download || fileObject.dirty) {
