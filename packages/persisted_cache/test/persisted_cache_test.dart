@@ -33,7 +33,7 @@ class MMTestStorage extends MMPersistedStorage {
 }
 
 void main() {
-  test('adds one to input values', () {
+  test('adds one to input values', () async {
     Future<Uint8List> _fileDownloader(MMFileInfo fileInfo) async {
       return Uint8List(0);
     }
@@ -43,9 +43,9 @@ void main() {
     }
 
     final persistedCache = PersistedCache();
-    persistedCache.setup(MMTestStorage(), _fileDownloader);
+    await persistedCache.setup(MMTestStorage(), _fileDownloader);
 
-    persistedCache.getFile("0000", "img", "url", "avartaImage", _fileProcessor);
+    persistedCache.getFile("0000", "img", "url", _fileProcessor);
 //    expect(calculator.addOne(2), 3);
 //    expect(calculator.addOne(-7), -6);
 //    expect(calculator.addOne(0), 1);

@@ -31,7 +31,7 @@ class PersistedCache {
 
   Stream<MMFileInfo> getFileStream(String uuid, String url, String fileType, String processType, MMFileProcessor processor) async* {
     try {
-      var webFile = await getFile(uuid, url, fileType, processType, processor);
+      var webFile = await getFile(uuid, url, fileType, processor);
       if (webFile != null) {
         yield webFile;
       }
@@ -41,17 +41,16 @@ class PersistedCache {
     }
   }
 
-  Future<MMFileInfo> getFile(String uuid, String url, String fileType, String processType, MMFileProcessor processor) async {
+  Future<MMFileInfo> getFile(String uuid, String url, String fileType, MMFileProcessor processor) async {
     assert(storage != null, "pls setup");
     assert(download != null, "pls setup");
-    var catchID = PersistedCache.catchID(uuid, fileType, processType);
+    var catchID = PersistedCache.catchID(uuid, fileType);
     var fileObject = await storage.queryRecord(catchID);
     if (fileObject == null) {
       MMFileInfo fileInfo = MMFileInfo();
       fileInfo.uuid = catchID;
       fileInfo.originalURL = url;
       fileInfo.fileType = fileType;
-      fileInfo.processType = processType;
       fileObject = await storage.createRecord(fileInfo);
     }
     fileObject.basePath = _filePath;
@@ -79,12 +78,12 @@ class PersistedCache {
     return fileObject;
   }
 
-  static catchID(String uuid, String fileType, String processType) {
-    return '${uuid}_${fileType}_$processType';
+  static catchID(String uuid, String fileType) {
+    return '${uuid}_${fileType}';
   }
 
   markDirty(String uuid, String fileType, String processType) async {
-    await markDirtyBy(PersistedCache.catchID(uuid, fileType, processType));
+    await markDirtyBy(PersistedCache.catchID(uuid, fileType));
   }
 
   markDirtyBy(String catchID) async {

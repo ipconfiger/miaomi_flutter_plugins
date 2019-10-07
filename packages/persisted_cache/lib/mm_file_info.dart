@@ -9,7 +9,6 @@ class MMFileInfo {
   String localURL;
   String thumbnailURL;
   String fileType;
-  String processType;
   bool download;
   bool processed;
   bool dirty;
