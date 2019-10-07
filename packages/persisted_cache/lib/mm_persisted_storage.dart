@@ -6,5 +6,5 @@ abstract class MMPersistedStorage {
 	Future<MMFileInfo> createRecord(MMFileInfo fileInfo);
 	Future setDownloaded(String uuid, String localURL);
 	Future setProcessed(String uuid, String thumbnailURL);
- 	Future setDirty(String uuid, String originalURL);
+ 	Future setDirty(String uuid);
 }
