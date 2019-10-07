@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:persisted_cache/mm_file_info.dart';
 
 import 'mm_file_manager.dart';
@@ -15,6 +16,7 @@ class PersistedCache {
   factory PersistedCache() {
     return _singleton;
   }
+
   PersistedCache._internal();
 
   MMPersistedStorage storage;
@@ -25,7 +27,20 @@ class PersistedCache {
     this.download = download;
   }
 
-  getFile(String uuid, String url, String fileType, String processType, MMFileProcessor processor) async {
+  Stream<MMFileInfo> getFileStream(String uuid, String url, String fileType, String processType, MMFileProcessor processor) async* {
+    try {
+      var webFile = await getFile(uuid, url, fileType, processType, processor);
+      if (webFile != null) {
+        yield webFile;
+      }
+    } catch (e) {
+      debugPrint("EROORO:");
+      debugPrint(e);
+      throw e;
+    }
+  }
+
+  Future<MMFileInfo> getFile(String uuid, String url, String fileType, String processType, MMFileProcessor processor) async {
     assert(storage != null, "pls setup");
     assert(download != null, "pls setup");
 
