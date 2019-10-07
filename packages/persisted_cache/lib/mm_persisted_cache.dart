@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
 import 'package:persisted_cache/mm_file_info.dart';
 
 import 'mm_file_manager.dart';
@@ -34,8 +33,7 @@ class PersistedCache {
         yield webFile;
       }
     } catch (e) {
-      debugPrint("EROORO:");
-      debugPrint(e);
+      print(e);
       throw e;
     }
   }
@@ -48,7 +46,7 @@ class PersistedCache {
     if (fileObject == null) {
       MMFileInfo fileInfo = MMFileInfo();
       fileInfo.uuid = uuid;
-      fileInfo.localURL = url;
+      fileInfo.originalURL = url;
       fileInfo.fileType = fileType;
       fileInfo.processType = processType;
       fileObject = await storage.createRecord(fileInfo);
