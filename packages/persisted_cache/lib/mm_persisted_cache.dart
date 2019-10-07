@@ -5,8 +5,8 @@ import 'package:persisted_cache/mm_file_info.dart';
 import 'mm_file_manager.dart';
 import 'mm_persisted_storage.dart';
 
-typedef Future<Uint8List> MMFileDownloader(String uuid, String url);
-typedef Future<Uint8List> MMFileProcessor(String url, String processType);
+typedef Future<Uint8List> MMFileDownloader(MMFileInfo fileInfo);
+typedef Future<Uint8List> MMFileProcessor(MMFileInfo fileInfo);
 
 /// A Calculator.
 class PersistedCache {
@@ -40,7 +40,7 @@ class PersistedCache {
     }
 
     if (!fileObject.download || fileObject.dirty) {
-      final fileBytes = await download(uuid, url);
+      final fileBytes = await download(fileObject);
       // Save file
       final file = await MMFileManager.save(fileBytes, uuid, fileType);
 
@@ -52,7 +52,7 @@ class PersistedCache {
     }
 
     if (!fileObject.processed) {
-      final fileBytes = await processor(url, processType);
+      final fileBytes = await processor(fileObject);
       // Save file
       final file = await MMFileManager.save(fileBytes, "${uuid}_thumb", fileType);
       fileObject.thumbnailURL = file.path.toString();

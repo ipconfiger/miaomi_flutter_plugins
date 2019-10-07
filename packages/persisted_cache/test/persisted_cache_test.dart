@@ -34,11 +34,11 @@ class MMTestStorage extends MMPersistedStorage {
 
 void main() {
   test('adds one to input values', () {
-    Future<Uint8List> _fileDownloader(String uuid, String url) async {
+    Future<Uint8List> _fileDownloader(MMFileInfo fileInfo) async {
       return Uint8List(0);
     }
 
-    Future<Uint8List> _fileProcessor(String url, String processType) async {
+    Future<Uint8List> _fileProcessor(MMFileInfo fileInfo) async {
       return Uint8List(0);
     }
 
