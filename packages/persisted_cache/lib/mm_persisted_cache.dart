@@ -44,7 +44,7 @@ class PersistedCache {
   Future<MMFileInfo> getFile(String uuid, String url, String fileType, String processType, MMFileProcessor processor) async {
     assert(storage != null, "pls setup");
     assert(download != null, "pls setup");
-    var catchID = '${uuid}_${fileType}_$processType';
+    var catchID = PersistedCache.catchID(uuid, fileType, processType);
     var fileObject = await storage.queryRecord(catchID);
     if (fileObject == null) {
       MMFileInfo fileInfo = MMFileInfo();
@@ -79,7 +79,15 @@ class PersistedCache {
     return fileObject;
   }
 
-  markDirty(String uuid, String originalURL) async {
-    await storage.setDirty(uuid);
+  static catchID(String uuid, String fileType, String processType) {
+    return '${uuid}_${fileType}_$processType';
+  }
+
+  markDirty(String uuid, String fileType, String processType) async {
+    await markDirtyBy(PersistedCache.catchID(uuid, fileType, processType));
+  }
+
+  markDirtyBy(String catchID) async {
+    await storage.setDirty(catchID);
   }
 }
