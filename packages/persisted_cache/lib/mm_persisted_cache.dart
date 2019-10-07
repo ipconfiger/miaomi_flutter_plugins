@@ -54,6 +54,7 @@ class PersistedCache {
       fileInfo.processType = processType;
       fileObject = await storage.createRecord(fileInfo);
     }
+    fileObject.basePath = _filePath;
 
     if (!fileObject.download || fileObject.dirty) {
       final fileBytes = await download(fileObject);
@@ -75,11 +76,10 @@ class PersistedCache {
       fileObject.processed = true;
       storage.setProcessed(uuid, fileObject.thumbnailURL);
     }
-    fileObject.basePath = _filePath;
     return fileObject;
   }
 
-  markDirty(String uuid) async {
-    await storage.setDirty(uuid);
+  markDirty(String uuid, String originalURL) async {
+    await storage.setDirty(uuid, originalURL);
   }
 }
