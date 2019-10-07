@@ -16,14 +16,17 @@ class PersistedCache {
     return _singleton;
   }
 
+  String _filePath;
+
   PersistedCache._internal();
 
   MMPersistedStorage storage;
   MMFileDownloader download;
 
-  setup(MMPersistedStorage storage, MMFileDownloader download) {
+  setup(MMPersistedStorage storage, MMFileDownloader download) async {
     this.storage = storage;
     this.download = download;
+    _filePath = await MMFileManager.getFilePath();
   }
 
   Stream<MMFileInfo> getFileStream(String uuid, String url, String fileType, String processType, MMFileProcessor processor) async* {
@@ -72,7 +75,7 @@ class PersistedCache {
       fileObject.processed = true;
       storage.setProcessed(uuid, fileObject.thumbnailURL);
     }
-
+    fileObject.basePath = _filePath;
     return fileObject;
   }
 

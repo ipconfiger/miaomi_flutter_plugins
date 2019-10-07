@@ -1,5 +1,6 @@
 library persisted_cache;
 import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 import 'mm_file_manager.dart';
 
@@ -15,13 +16,12 @@ class MMFileInfo {
 	bool processed;
 	bool dirty;
 
-	Future<File> getThumbFile() async {
-		final filePath = await MMFileManager.getFile(thumbnailURL);
-		return File(filePath);
+	String basePath;
+	 getThumbFullRUL() async {
+		return p.join(basePath, "$thumbnailURL");
 	}
 
-	Future<File> getLocalFile() async {
-		final filePath = await MMFileManager.getFile(localURL);
-		return File(filePath);
+	getLocalFullURL() async {
+		return p.join(basePath, "$localURL");
 	}
 }
