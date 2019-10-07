@@ -1,5 +1,7 @@
 library persisted_cache;
+import 'dart:io';
 
+import 'mm_file_manager.dart';
 
 /// A Calculator.
 class MMFileInfo {
@@ -12,4 +14,14 @@ class MMFileInfo {
 	bool download;
 	bool processed;
 	bool dirty;
+
+	Future<File> getThumbFile() async {
+		final filePath = await MMFileManager.getFile(thumbnailURL);
+		return File(filePath);
+	}
+
+	Future<File> getLocalFile() async {
+		final filePath = await MMFileManager.getFile(localURL);
+		return File(filePath);
+	}
 }

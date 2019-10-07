@@ -57,7 +57,7 @@ class PersistedCache {
       // Save file
       final file = await MMFileManager.save(fileBytes, uuid, fileType);
 
-      fileObject.localURL = file.path.toString();
+      fileObject.localURL = "$fileType/$uuid";
       fileObject.download = true;
       fileObject.dirty = false;
       fileObject.processed = false;
@@ -67,8 +67,8 @@ class PersistedCache {
     if (!fileObject.processed) {
       final fileBytes = await processor(fileObject);
       // Save file
-      final file = await MMFileManager.save(fileBytes, "${uuid}_thumb", fileType);
-      fileObject.thumbnailURL = file.path.toString();
+      await MMFileManager.save(fileBytes, "${uuid}_thumb", fileType);
+      fileObject.thumbnailURL = "$fileType/${uuid}_thumb";
       fileObject.processed = true;
       storage.setProcessed(uuid, fileObject.thumbnailURL);
     }
