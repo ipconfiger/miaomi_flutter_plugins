@@ -60,6 +60,8 @@ class PersistedCache {
       fileInfo.uuid = uuid;
       fileInfo.originalURL = url;
       fileInfo.fileType = fileType;
+      fileInfo.download = false;
+      fileInfo.processed = false;
       fileObject = await storage.createRecord(fileInfo);
     } else {
       print("PersistedCache=== fileObject not null");
@@ -110,6 +112,8 @@ class PersistedCache {
       fileInfo.uuid = uuid;
       fileInfo.originalURL = url;
       fileInfo.fileType = fileType;
+      fileInfo.download = false;
+      fileInfo.processed = false;
       fileObject = await storage.createRecord(fileInfo);
     } else {
       print("PersistedCache=== fileObject not null");
