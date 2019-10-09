@@ -47,17 +47,17 @@ class PersistedCache {
     return p.join(_filePath, path);
   }
 
+
   Future<MMFileInfo> getFile(String uuid, String url, String fileType, MMFileProcessor processor) async {
     assert(storage != null, "pls setup");
     assert(download != null, "pls setup");
     print("PersistedCache=== getFile:$uuid $url $fileType");
-    var catchID = PersistedCache.catchID(uuid, fileType);
-    print("PersistedCache=== catchID:$catchID");
-    var fileObject = await storage.queryRecord(catchID);
+    print("PersistedCache=== catchID:$uuid");
+    var fileObject = await storage.queryRecord(uuid);
     if (fileObject == null) {
       print("PersistedCache=== fileObject null");
       MMFileInfo fileInfo = MMFileInfo();
-      fileInfo.uuid = catchID;
+      fileInfo.uuid = uuid;
       fileInfo.originalURL = url;
       fileInfo.fileType = fileType;
       fileObject = await storage.createRecord(fileInfo);
@@ -73,83 +73,74 @@ class PersistedCache {
     if (!fileObject.download || fileObject.dirty) {
       final fileBytes = await download(fileObject);
       // Save file
-      final file = await MMFileManager.save(fileBytes, catchID, fileType);
+      final file = await MMFileManager.save(fileBytes, uuid, fileType);
       fileObject.originalURL = url;
-      fileObject.localURL = "$fileType/$catchID";
+      fileObject.localURL = "$fileType/$uuid";
       fileObject.download = true;
       fileObject.dirty = false;
       fileObject.processed = false;
-      await storage.setDownloaded(catchID, fileObject.localURL);
+      await storage.setDownloaded(uuid, fileObject.localURL);
     }
 
     print("PersistedCache=== pre processed ${fileObject.toString()}");
     if (!fileObject.processed) {
       final fileBytes = await processor(fileObject);
       // Save file
-      await MMFileManager.save(fileBytes, "${catchID}_thumb", fileType);
-      fileObject.thumbnailURL = "$fileType/${catchID}_thumb";
+      await MMFileManager.save(fileBytes, "${uuid}_thumb", fileType);
+      fileObject.thumbnailURL = "$fileType/${uuid}_thumb";
       fileObject.processed = true;
-      await storage.setProcessed(catchID, fileObject.thumbnailURL);
+      await storage.setProcessed(uuid, fileObject.thumbnailURL);
     }
     print("PersistedCache=== result ${fileObject.toString()}");
 
     return fileObject;
   }
 
+//  var catchID = PersistedCache.catchID(uuid, fileType);
 
-  Future<MMFileInfo> updateFile(String uuid, String url, String fileType, MMFileProcessor processor, Uint8List localFileBytes) async {
-    var catchID = PersistedCache.catchID(uuid, fileType);
+  Future<MMFileInfo> putFile(String uuid, String url, String fileType, MMFileProcessor processor, Uint8List localFileBytes) async {
     print("PersistedCache=== updateFile getFile:$uuid $url $fileType");
-    print("PersistedCache=== updateFile catchID:$catchID");
+    print("PersistedCache=== updateFile catchID:$uuid");
 
-    var fileObject = await storage.queryRecord(catchID);
+    var fileObject = await storage.queryRecord(uuid);
     if (fileObject == null) {
       print("PersistedCache=== fileObject null");
 
       MMFileInfo fileInfo = MMFileInfo();
-      fileInfo.uuid = catchID;
+      fileInfo.uuid = uuid;
       fileInfo.originalURL = url;
       fileInfo.fileType = fileType;
       fileObject = await storage.createRecord(fileInfo);
     } else {
       print("PersistedCache=== fileObject not null");
+      await storage.updateURL(uuid, url);
     }
-
-    await storage.updateURL(catchID, url);
-
     fileObject.basePath = _filePath;
+
+
     print("PersistedCache=== updateFile pre download ${fileObject.toString()}");
 
     // Save filenashi
-    final file = await MMFileManager.save(localFileBytes, catchID, fileType);
-    fileObject.originalURL = url;
-    fileObject.localURL = "$fileType/$catchID";
-    fileObject.download = true;
-    fileObject.dirty = false;
-    fileObject.processed = false;
-    await storage.setDownloaded(catchID, fileObject.localURL);
+    await MMFileManager.save(localFileBytes, uuid, fileType);
+    fileObject.localURL = "$fileType/$uuid";
+    await storage.setDownloaded(uuid, fileObject.localURL);
 
     print("PersistedCache=== updateFile pre processed ${fileObject.toString()}");
 
     final fileBytes = await processor(fileObject);
     // Save file
-    await MMFileManager.save(fileBytes, "${catchID}_thumb", fileType);
-    fileObject.thumbnailURL = "$fileType/${catchID}_thumb";
+    await MMFileManager.save(fileBytes, "${uuid}_thumb", fileType);
+    fileObject.thumbnailURL = "$fileType/${uuid}_thumb";
     fileObject.processed = true;
-    await storage.setProcessed(catchID, fileObject.thumbnailURL);
+    await storage.setProcessed(uuid, fileObject.thumbnailURL);
     print("PersistedCache=== updateFile result ${fileObject.toString()}");
 
     return fileObject;
   }
 
 
-  static catchID(String uuid, String fileType) {
-    return '${uuid}_${fileType}';
-  }
+  getCatchID(String uuid, String fileType) => '${uuid}_${fileType}';
 
-  markDirty(String uuid, String fileType) async {
-    await markDirtyBy(PersistedCache.catchID(uuid, fileType));
-  }
 
   markDirtyBy(String catchID) async {
     await storage.setDirty(catchID);

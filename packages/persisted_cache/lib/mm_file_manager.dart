@@ -14,8 +14,7 @@ class MMFileManager {
     if (!(await folder.exists())) {
       folder.createSync(recursive: true);
     }
-    var file = await new File(path).writeAsBytes(fileBytes);
-    return file;
+    return await File(path).writeAsBytes(fileBytes);;
   }
 
   static Future<String> getFilePath() async {
