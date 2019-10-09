@@ -100,8 +100,8 @@ class PersistedCache {
 
 //  var catchID = PersistedCache.catchID(uuid, fileType);
 
-  Future<MMFileInfo> putFile(String uuid, String url, String fileType, MMFileProcessor processor, Uint8List localFileBytes) async {
-    print("PersistedCache=== updateFile getFile:$uuid $url $fileType");
+  Future<MMFileInfo> putFile(String uuid, String ext, String proceeType, MMFileProcessor processor, Uint8List localFileBytes) async {
+    print("PersistedCache=== updateFile getFile:$uuid $ext $proceeType");
     print("PersistedCache=== updateFile catchID:$uuid");
 
     var fileObject = await storage.queryRecord(uuid);
@@ -110,14 +110,11 @@ class PersistedCache {
 
       MMFileInfo fileInfo = MMFileInfo();
       fileInfo.uuid = uuid;
-      fileInfo.originalURL = url;
-      fileInfo.fileType = fileType;
+      fileInfo.originalURL = '';
+      fileInfo.fileType = proceeType;
       fileInfo.download = false;
       fileInfo.processed = false;
       fileObject = await storage.createRecord(fileInfo);
-    } else {
-      print("PersistedCache=== fileObject not null");
-      await storage.updateURL(uuid, url);
     }
     fileObject.basePath = _filePath;
 
@@ -125,16 +122,16 @@ class PersistedCache {
     print("PersistedCache=== updateFile pre download ${fileObject.toString()}");
 
     // Save filenashi
-    await MMFileManager.save(localFileBytes, uuid, fileType);
-    fileObject.localURL = "$fileType/$uuid";
+    await MMFileManager.save(localFileBytes, "$uuid.$ext", proceeType);
+    fileObject.localURL = "$proceeType/$uuid.$ext";
     await storage.setDownloaded(uuid, fileObject.localURL);
 
     print("PersistedCache=== updateFile pre processed ${fileObject.toString()}");
 
     final fileBytes = await processor(fileObject);
     // Save file
-    await MMFileManager.save(fileBytes, "${uuid}_thumb", fileType);
-    fileObject.thumbnailURL = "$fileType/${uuid}_thumb";
+    await MMFileManager.save(fileBytes, "${uuid}_thumb", proceeType);
+    fileObject.thumbnailURL = "$proceeType/${uuid}_thumb";
     fileObject.processed = true;
     await storage.setProcessed(uuid, fileObject.thumbnailURL);
     print("PersistedCache=== updateFile result ${fileObject.toString()}");

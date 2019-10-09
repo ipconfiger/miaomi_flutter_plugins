@@ -30,6 +30,11 @@ class MMTestStorage extends MMPersistedStorage {
     return null;
   }
 
+  @override
+  Future updateURL(String uuid, String orgURL) {
+    return null;
+  }
+
 }
 
 void main() {
