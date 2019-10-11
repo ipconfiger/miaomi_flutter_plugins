@@ -9,7 +9,7 @@ import 'mm_persisted_storage.dart';
 typedef Future<Uint8List> MMFileDownloader(MMFileInfo fileInfo);
 typedef Future<Uint8List> MMFileProcessor(MMFileInfo fileInfo);
 
-typedef Future<Uint8List> MMFileLoadCallback(MMFileInfo fileInfo, MMFileInfoStatus status);
+typedef MMFileLoadCallback(MMFileInfo fileInfo, MMFileInfoStatus status);
 
 /// A Calculator.
 class PersistedCache {
