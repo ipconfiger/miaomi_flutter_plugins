@@ -53,6 +53,7 @@ class PersistedCache {
     assert(download != null, "pls setup");
     print("PersistedCache=== getFile:$uuid $url $fileType");
     print("PersistedCache=== catchID:$uuid");
+    final fileExt = url.split('.').last.split("#").first;
     var fileObject = await storage.queryRecord(uuid);
     if (fileObject == null) {
       print("PersistedCache=== fileObject null");
@@ -75,9 +76,9 @@ class PersistedCache {
     if (!fileObject.download || fileObject.dirty) {
       final fileBytes = await download(fileObject);
       // Save file
-      final file = await MMFileManager.save(fileBytes, uuid, fileType);
+      final file = await MMFileManager.save(fileBytes, "$uuid.$fileExt", fileType);
       fileObject.originalURL = url;
-      fileObject.localURL = "$fileType/$uuid";
+      fileObject.localURL = "$fileType/$uuid.$fileExt";
       fileObject.download = true;
       fileObject.dirty = false;
       fileObject.processed = false;
