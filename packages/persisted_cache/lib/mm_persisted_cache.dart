@@ -6,7 +6,6 @@ import 'package:persisted_cache/mm_file_info.dart';
 import 'mm_file_manager.dart';
 import 'mm_persisted_storage.dart';
 
-
 typedef Future<Uint8List> MMFileDownloader(MMFileInfo fileInfo);
 typedef Future<Uint8List> MMFileProcessor(MMFileInfo fileInfo);
 
@@ -47,16 +46,9 @@ class PersistedCache {
     return p.join(_filePath, path);
   }
 
-
   Future<MMFileInfo> getFile(String uuid, String url, String fileType, MMFileProcessor processor) async {
-    assert(storage != null, "pls setup");
-    assert(download != null, "pls setup");
-    print("PersistedCache=== getFile:$uuid $url $fileType");
-    print("PersistedCache=== catchID:$uuid");
-    final fileExt = url.split('.').last.split("#").first;
     var fileObject = await storage.queryRecord(uuid);
     if (fileObject == null) {
-      print("PersistedCache=== fileObject null");
       MMFileInfo fileInfo = MMFileInfo();
       fileInfo.uuid = uuid;
       fileInfo.originalURL = url;
@@ -64,28 +56,24 @@ class PersistedCache {
       fileInfo.download = false;
       fileInfo.processed = false;
       fileObject = await storage.createRecord(fileInfo);
-    } else {
-      print("PersistedCache=== fileObject not null");
-    }
-
+    } else {}
 
     fileObject.basePath = _filePath;
 
-    print("PersistedCache=== pre download ${fileObject.toString()}");
-
     if (!fileObject.download || fileObject.dirty) {
       final fileBytes = await download(fileObject);
+      final fileExt = url.split('.').last.split("#").first;
       // Save file
-      final file = await MMFileManager.save(fileBytes, "$uuid.$fileExt", fileType);
+      final fileName = "$uuid.$fileExt";
+      await MMFileManager.save(fileBytes, fileName, fileType);
       fileObject.originalURL = url;
-      fileObject.localURL = "$fileType/$uuid.$fileExt";
+      fileObject.localURL = "$fileType/$fileName";
       fileObject.download = true;
       fileObject.dirty = false;
       fileObject.processed = false;
       await storage.setDownloaded(uuid, fileObject.localURL);
     }
 
-    print("PersistedCache=== pre processed ${fileObject.toString()}");
     if (!fileObject.processed) {
       final fileBytes = await processor(fileObject);
       // Save file
@@ -94,21 +82,13 @@ class PersistedCache {
       fileObject.processed = true;
       await storage.setProcessed(uuid, fileObject.thumbnailURL);
     }
-    print("PersistedCache=== result ${fileObject.toString()}");
 
     return fileObject;
   }
 
-//  var catchID = PersistedCache.catchID(uuid, fileType);
-
   Future<MMFileInfo> putFile(String uuid, String ext, String proceeType, MMFileProcessor processor, Uint8List localFileBytes) async {
-    print("PersistedCache=== updateFile getFile:$uuid $ext $proceeType");
-    print("PersistedCache=== updateFile catchID:$uuid");
-
     var fileObject = await storage.queryRecord(uuid);
     if (fileObject == null) {
-      print("PersistedCache=== fileObject null");
-
       MMFileInfo fileInfo = MMFileInfo();
       fileInfo.uuid = uuid;
       fileInfo.originalURL = '';
@@ -119,15 +99,11 @@ class PersistedCache {
     }
     fileObject.basePath = _filePath;
 
-
-    print("PersistedCache=== updateFile pre download ${fileObject.toString()}");
-
-    // Save filenashi
-    await MMFileManager.save(localFileBytes, "$uuid.$ext", proceeType);
-    fileObject.localURL = "$proceeType/$uuid.$ext";
+    // Save file
+    final fileName = "$uuid.$ext";
+    await MMFileManager.save(localFileBytes, fileName, proceeType);
+    fileObject.localURL = "$proceeType/$fileName";
     await storage.setDownloaded(uuid, fileObject.localURL);
-
-    print("PersistedCache=== updateFile pre processed ${fileObject.toString()}");
 
     final fileBytes = await processor(fileObject);
     // Save file
@@ -135,14 +111,11 @@ class PersistedCache {
     fileObject.thumbnailURL = "$proceeType/${uuid}_thumb";
     fileObject.processed = true;
     await storage.setProcessed(uuid, fileObject.thumbnailURL);
-    print("PersistedCache=== updateFile result ${fileObject.toString()}");
 
     return fileObject;
   }
 
-
-  getCatchID(String uuid, String fileType) => '${uuid}_${fileType}';
-
+  getCatchID(String uuid, String fileType) => '${uuid}_$fileType';
 
   markDirtyBy(String catchID) async {
     await storage.setDirty(catchID);
