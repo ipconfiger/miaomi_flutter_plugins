@@ -2,6 +2,13 @@ library persisted_cache;
 
 import 'package:path/path.dart' as p;
 
+enum MMFileInfoStatus {
+  create,
+  download,
+  process,
+  finish
+}
+
 /// A Calculator.
 class MMFileInfo {
   String uuid;

@@ -9,6 +9,8 @@ import 'mm_persisted_storage.dart';
 typedef Future<Uint8List> MMFileDownloader(MMFileInfo fileInfo);
 typedef Future<Uint8List> MMFileProcessor(MMFileInfo fileInfo);
 
+typedef Future<Uint8List> MMFileLoadCallback(MMFileInfo fileInfo, MMFileInfoStatus status);
+
 /// A Calculator.
 class PersistedCache {
   static final PersistedCache _singleton = new PersistedCache._internal();
@@ -82,6 +84,51 @@ class PersistedCache {
       fileObject.processed = true;
       await storage.setProcessed(uuid, fileObject.thumbnailURL);
     }
+
+    return fileObject;
+  }
+
+  Future loadFile(String uuid, String url, String fileType, MMFileProcessor processor, MMFileLoadCallback callback) async {
+    var fileObject = await storage.queryRecord(uuid);
+    if (fileObject == null) {
+      MMFileInfo fileInfo = MMFileInfo();
+      fileInfo.uuid = uuid;
+      fileInfo.originalURL = url;
+      fileInfo.fileType = fileType;
+      fileInfo.download = false;
+      fileInfo.processed = false;
+      fileObject = await storage.createRecord(fileInfo);
+      callback(fileObject, MMFileInfoStatus.create);
+    }
+
+    fileObject.basePath = _filePath;
+
+    if (!fileObject.download || fileObject.dirty) {
+      final fileBytes = await download(fileObject);
+      final fileExt = url.split('.').last.split("#").first;
+      // Save file
+      final fileName = "$uuid.$fileExt";
+      await MMFileManager.save(fileBytes, fileName, fileType);
+      fileObject.originalURL = url;
+      fileObject.localURL = "$fileType/$fileName";
+      fileObject.download = true;
+      fileObject.dirty = false;
+      fileObject.processed = false;
+      await storage.setDownloaded(uuid, fileObject.localURL);
+      callback(fileObject, MMFileInfoStatus.download);
+    }
+
+    if (!fileObject.processed) {
+      final fileBytes = await processor(fileObject);
+      // Save file
+      await MMFileManager.save(fileBytes, "${uuid}_thumb", fileType);
+      fileObject.thumbnailURL = "$fileType/${uuid}_thumb";
+      fileObject.processed = true;
+      await storage.setProcessed(uuid, fileObject.thumbnailURL);
+      callback(fileObject, MMFileInfoStatus.process);
+    }
+
+    callback(fileObject, MMFileInfoStatus.finish);
 
     return fileObject;
   }
