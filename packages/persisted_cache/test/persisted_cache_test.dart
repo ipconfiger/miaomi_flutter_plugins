@@ -50,7 +50,7 @@ void main() {
     final persistedCache = PersistedCache();
     await persistedCache.setup(MMTestStorage(), _fileDownloader);
 
-    persistedCache.getFile("0000", "img", "url", _fileProcessor);
+//    persistedCache.getFile("0000", "img", "url", _fileProcessor);
 //    expect(calculator.addOne(2), 3);
 //    expect(calculator.addOne(-7), -6);
 //    expect(calculator.addOne(0), 1);

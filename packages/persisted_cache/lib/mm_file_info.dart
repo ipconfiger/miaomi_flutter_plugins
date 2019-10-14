@@ -29,4 +29,11 @@ class MMFileInfo {
   getLocalFullURL() {
     return p.join(basePath, "$localURL");
   }
+
+  @override
+  String toString() {
+    return 'MMFileInfo{uuid: $uuid, originalURL: $originalURL, localURL: $localURL, thumbnailURL: $thumbnailURL, fileType: $fileType, download: $download, processed: $processed, dirty: $dirty, basePath: $basePath}';
+  }
+
+
 }
