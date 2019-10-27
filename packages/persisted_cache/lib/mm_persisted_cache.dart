@@ -36,77 +36,15 @@ class PersistedCache {
     return p.join(_filePath, path);
   }
 
-//  Stream<MMFileInfo> getFileStream(String uuid, String url, String fileType, MMFileProcessor processor) async* {
-//    try {
-//      var webFile = await getFile(uuid, url, fileType, processor);
-//      if (webFile != null) {
-//        yield webFile;
-//      }
-//    } catch (e) {
-//      print(e);
-//      throw e;
-//    }
-//  }
-//
-
-//
-//  Future<MMFileInfo> getFile(String uuid, String url, String fileType, MMFileProcessor processor) async {
-//    var fileObject = await storage.queryRecord(uuid);
-//    if (fileObject == null) {
-//      MMFileInfo fileInfo = MMFileInfo();
-//      fileInfo.uuid = uuid;
-//      fileInfo.originalURL = url;
-//      fileInfo.fileType = fileType;
-//      fileInfo.download = false;
-//      fileInfo.processed = false;
-//      fileObject = await storage.createRecord(fileInfo);
-//    }
-//
-//    if (fileObject.originalURL != url) {
-//      await storage.updateURL(uuid, url);
-//      fileObject.originalURL = url;
-//    }
-//
-//    fileObject.basePath = _filePath;
-//
-//    if (!fileObject.download || fileObject.dirty) {
-//      final fileBytes = await download(fileObject);
-//      print("Download URL ${fileObject.originalURL}");
-//
-//      final fileExt = url.split('.').last.split("#").first;
-//      // Save file
-//      final fileName = "$uuid.$fileExt";
-//      await MMFileManager.save(fileBytes, fileName, fileType);
-//      fileObject.localURL = "$fileType/$fileName";
-//      fileObject.download = true;
-//      fileObject.dirty = false;
-//      fileObject.processed = false;
-//      await storage.setDownloaded(uuid, fileObject.localURL);
-//    }
-//
-//    if (!fileObject.processed) {
-//      final fileBytes = await processor(fileObject);
-//      // Save file
-//      if (fileBytes.isNotEmpty) {
-//        await MMFileManager.save(fileBytes, "${uuid}_thumb", fileType);
-//        fileObject.thumbnailURL = "$fileType/${uuid}_thumb";
-//      } else {
-//        fileObject.thumbnailURL = "";
-//      }
-//      fileObject.processed = true;
-//      await storage.setProcessed(uuid, fileObject.thumbnailURL);
-//    }
-//
-//    return fileObject;
-//  }
-
-  Future loadFile(String uuid, String url, String fileType, MMFileProcessor processor, MMFileLoadCallback callback) async {
+  Future loadFile(String uuid, String url, String fileType,
+      MMFileProcessor processor, MMFileLoadCallback callback) async {
     var fileObject = await storage.queryRecord(uuid);
     if (fileObject == null) {
       MMFileInfo fileInfo = MMFileInfo();
       fileInfo.uuid = uuid;
       fileInfo.originalURL = url;
       fileInfo.fileType = fileType;
+      fileInfo.dirty = false;
       fileInfo.download = false;
       fileInfo.processed = false;
       fileObject = await storage.createRecord(fileInfo);
@@ -118,12 +56,14 @@ class PersistedCache {
 
 
     fileObject.basePath = _filePath;
-    print("fileObject ${fileObject.toString()}");
-    print("fileObject download ${fileObject.download}");
-    print("fileObject dirty ${fileObject.dirty}");
+
     if (!fileObject.download || fileObject.dirty == true) {
       final fileBytes = await download(fileObject);
-      final fileExt = url.split('.').last.split("#").first;
+      final fileExt = url
+          .split('.')
+          .last
+          .split("#")
+          .first;
       // Save file
       final fileName = "$uuid.$fileExt";
       await MMFileManager.save(fileBytes, fileName, fileType);
@@ -155,7 +95,8 @@ class PersistedCache {
     return fileObject;
   }
 
-  Future<MMFileInfo> putFile(String uuid, String ext, String proceeType, MMFileProcessor processor, Uint8List localFileBytes) async {
+  Future<MMFileInfo> putFile(String uuid, String ext, String proceeType,
+      MMFileProcessor processor, Uint8List localFileBytes) async {
     var fileObject = await storage.queryRecord(uuid);
     if (fileObject == null) {
       MMFileInfo fileInfo = MMFileInfo();
