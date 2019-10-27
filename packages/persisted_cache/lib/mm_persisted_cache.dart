@@ -118,8 +118,10 @@ class PersistedCache {
 
 
     fileObject.basePath = _filePath;
-
-    if (!fileObject.download || fileObject.dirty) {
+    print("fileObject ${fileObject.toString()}");
+    print("fileObject download ${fileObject.download}");
+    print("fileObject dirty ${fileObject.dirty}");
+    if (!fileObject.download || fileObject.dirty == true) {
       final fileBytes = await download(fileObject);
       final fileExt = url.split('.').last.split("#").first;
       // Save file
